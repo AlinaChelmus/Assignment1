@@ -1,0 +1,65 @@
+﻿@page "/AddAdult"
+@using Microsoft.AspNetCore.Components
+@using Assignment1.Data
+@using Models
+@inject IAdultData AdultData
+@inject NavigationManager NavigationManager
+
+
+
+<h3>AddAdult</h3>
+
+<EditForm Model="@newAdultItem" OnValidSubmit="@AddNewAdult">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group"> Adult Id: <br/>
+        <InputNumber @bind-Value="newAdultItem.Id"/>
+    </div>
+    <div class="form-group"> Adult First Name:  <br/>
+        <InputText @bind-Value="newAdultItem.FirstName"/>
+    </div>
+    <div class="form-group"> Adult Last Name: <br/>
+        <InputText @bind-Value="newAdultItem.LastName"/>
+    </div>
+    <div class="form-group"> Adult Hair Color: <br/>
+        <InputText @bind-Value="newAdultItem.HairColor"/>
+    </div>
+    <div class="form-group"> Adult Eyes Color: <br/>
+        <InputText @bind-Value="newAdultItem.EyeColor"/>
+    </div>
+    <div class="form-group"> Adult Age: <br/>
+        <InputNumber @bind-Value="newAdultItem.Age"/>
+    </div>
+    <div class="form-group"> Adult Weight: <br/>
+        <InputNumber @bind-Value="newAdultItem.Weight"/>
+    </div>
+    <div class="form-group"> Adult Height: <br/>
+        <InputNumber @bind-Value="newAdultItem.Height"/>
+    </div>
+    <div class="form-group"> Adult Sex: <br/>
+        <InputText @bind-Value="newAdultItem.Sex"/>
+    </div>
+    <div class="form-group"> Job Title:<br/>
+        <InputText @bind-Value="newAdultItem.JobTitle"/>
+        </div>
+    <div class="form-group"> Salary:<br/>
+        <InputNumber @bind-Value="newAdultItem.Salary"/>
+        </div>
+
+    <p class="actions">
+        <button class="btn btn-outline-light" type="submit">Create</button>
+    </p>
+    
+</EditForm>
+
+
+
+@code {
+    private Adult newAdultItem = new Adult();
+
+    private void AddNewAdult()
+    {
+        FileContext.AddAdult(newAdultItem);
+        NavigationManager.NavigateTo("/Adults");
+    }
+}

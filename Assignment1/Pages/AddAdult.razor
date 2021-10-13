@@ -4,7 +4,7 @@
 @using Models
 @inject IAdultData AdultData
 @inject NavigationManager NavigationManager
-
+@attribute [Authorize(Policy = "MustBeLogin")]
 
 
 <h3>AddAdult</h3>
@@ -59,7 +59,7 @@
 
     private void AddNewAdult()
     {
-        FileContext.AddAdult(newAdultItem);
+        AdultJsonData.AddAdult(newAdultItem);
         NavigationManager.NavigateTo("/Adults");
     }
 }

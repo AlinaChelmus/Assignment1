@@ -1,6 +1,121 @@
-﻿@page "/Adult"
-<h3>Adult</h3>
+﻿page "/Adults"
+@using Assignment1.Data
+@using Models
+@using System.Collections
+@inject IAdultData FileContext
+@inject NavigationManager NavigationManager
+@inject IAdultData AdultJsonData
+
+
+
+<div class="page">
+    <p>Search by First Name:<input type="text" @oninput="@((arg) => Filter(arg))" 
+                                   style="width: 200px"/>
+    </p>
+
+    @if (AdultToShow == null)
+    {
+        <p>
+            <em>Loading..</em>
+        </p>
+    }
+    else if (!AdultToShow.Any())
+    {
+        <p>
+            <em>No Adult List. Please add some.</em>
+        </p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>HairColor</th>
+                <th>EyeColor</th>
+                <th>Age</th>
+                <th>Weight</th>
+                <th>Height</th>
+                <th>Sex</th>
+                <th>JobTitle</th>
+                <th>Salary</th>
+                <th>Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in AdultToShow)
+            {
+                <tr>
+
+                    <td>@item.Id</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.HairColor</td>
+                    <td>@item.EyeColor</td>
+                    <td>@item.Age</td>
+                    <td>@item.Weight</td>
+                    <td>@item.Height</td>
+                    <td>@item.Sex</td>
+                    <td>@item.JobTitle</td>
+                    <td>@item.Salary</td>
+                    <td>
+                        <button @onclick="@(() => RemoveAdultById(item.Id))">
+                            <i class="oi oi-trash" style="color:red"/>
+                        </button> </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+</div>
+
 
 @code {
+
+    private IList<Adult> AllAdults;
+    private IList<Adult> AdultToShow;
+    private string filterByName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllAdults = AdultJsonData.GetAdults();
+        AdultToShow = AllAdults;
+    }
+
+    private void Filter(ChangeEventArgs changeEventArgs)
+    {
+        filterByName = null;
+        try
+        {
+            filterByName = changeEventArgs.Value.ToString();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        ExecuteFilter();
+    }
+    
+    private void ExecuteFilter()
+    {
+        AdultsToShow = AllAdults.Where(a => a.FirstName.Equals(filterByName)).ToList();
+    }
+
+    
+    private void RemoveAdultById(int Id)
+    {
+        AdultJsonData.RemoveAdult(Id);
+        AdultToShow.Remove(null);
+    }
+
+    private void EditAdult(int Id)
+    {
+        NavigationManager.NavigateTo($"EditAdult/{Id}");
+    }
+
     
 }

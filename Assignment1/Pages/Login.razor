@@ -1,6 +1,60 @@
 ﻿@page "/Login"
+@namespace LoginComponent
+@using Assignment1.Authentication
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
 <h3>Login</h3>
-
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="form-group">
+            <label>User name:</label> 
+            <input type="text" placeholder="user name" @bind-value="username"/>
+        </div>
+        <div class="form-group">
+            <label>Password:</label> <input type="password" placeholder="password" @bind-value="password"/>
+        </div>
+        <div style="color:red">@errorMessage</div> <a href="" @onclick="PerformLogin"> Login </a>
+    </NotAuthorized>
+    <Authorized>
+        <a href="" @onclick="PerformLogout"> Log out </a>
+    </Authorized>
+</AuthorizeView>
 @code {
+    private string username;
+    private string password;
+    private string ErrorMessage;
+
+    public async Task PerformLogin()
+    {
+        ErrorMessage = "";
+        try
+        {
+            ((CustomAuthenticationStateProvider) AuthenticationStateProvider).ValidateLogin(username, password);
+            username = "";
+            password = "";
+            NavigationManager.NavigateTo("/adults");
+        }
+        catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+        }
+    }
+
+    public async Task PerformLogout()
+    {
+        ErrorMessage = "";
+        username = "";
+        password = "";
+        try
+        {
+            ((CustomAuthenticationStateProvider) AuthenticationStateProvider).Logout();
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception e)
+        {
+         
+        }
+    }
     
 }

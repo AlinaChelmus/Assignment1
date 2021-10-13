@@ -8,15 +8,16 @@ using Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
+
 namespace Assignment1.Authentication
 {
-    public class AuthenticationStateProvider : AuthenticationStateProvider
+    public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly IJSRuntime jsRuntime;
+     private readonly IJSRuntime jsRuntime;
         private readonly IUserService userService;
         private User cachedUser;
 
-        public AuthenticationStateProvider(IJSRuntime jsRuntime, IUserService userService)
+        public CustomAuthenticationStateProvider(IJSRuntime jsRuntime, IUserService userService)
         {
             this.jsRuntime = jsRuntime;
             this.userService = userService;
@@ -31,7 +32,7 @@ namespace Assignment1.Authentication
                 if (!string.IsNullOrEmpty(userAsJson))
                 {
                     User tmp = JsonSerializer.Deserialize<User>(userAsJson);
-                    ValidateLogin(tmp.Email, tmp.Password);
+                    ValidateLogin(tmp.Username, tmp.Password);
                 }
             }
             else
@@ -43,15 +44,15 @@ namespace Assignment1.Authentication
             return await Task.FromResult(new AuthenticationState(cachedClaimsPrincipal));
         }
 
-        public void ValidateLogin(string email, string password)
+        public void ValidateLogin(string username, string password)
         {
             Console.WriteLine("Validating log in");
-            if (string.IsNullOrEmpty(email)) throw new Exception("Enter email");
+            if (string.IsNullOrEmpty(username)) throw new Exception("Enter username");
             if (string.IsNullOrEmpty(password)) throw new Exception("Enter password");
             ClaimsIdentity identity = new ClaimsIdentity();
             try
             {
-                User user = userService.ValisateUser(email, password);
+                User user = userService.ValidateUser(username, password);
                 identity = SetupClaimsForUser(user);
                 string serialisedData = JsonSerializer.Serialize(user);
                 jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serialisedData);
@@ -59,43 +60,30 @@ namespace Assignment1.Authentication
             }
             catch (Exception e)
             {
-                throw e;
+                throw new Exception("Identity claim failed");
             }
 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
         }
 
-        public bool IsEmailRegistered(string email)
-        {
-            return userService.IsEmailRegistered(email);
-        }
-        public void Logout()
+        public async Task Logout()
         {
             cachedUser = null;
             var user = new ClaimsPrincipal(new ClaimsIdentity());
-            jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", "");
+            await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", "");
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 
         private ClaimsIdentity SetupClaimsForUser(User user)
         {
             List<Claim> claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Name, user.UserFirstName));
-            claims.Add(new Claim("Last name", user.UserLastName));
-            claims.Add(new Claim("Email", user.Email));
+            claims.Add(new Claim(ClaimTypes.Name, user.Username));
             claims.Add(new Claim("Password", user.Password));
-            claims.Add(new Claim("BirthYear", user.BirthYear.ToString()));
-            claims.Add(new Claim("SecurityLevel", user.SecurityLevel.ToString()));
-
+            
+            
             ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth_type");
             return identity;
         }
-
-        public void RegisterUser(User user)
-        {
-            userService.RegisterUser(user);
-        }
-
     }
 
 }

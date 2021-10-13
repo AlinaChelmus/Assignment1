@@ -1,8 +1,9 @@
 ﻿@page "/AddAdult"
 @using Microsoft.AspNetCore.Components
 @using Assignment1.Data
-@using Models
-@inject IAdultData AdultData
+
+@inject IAdultData FileContext
+@inject IAdultData adultJsonData
 @inject NavigationManager NavigationManager
 @attribute [Authorize(Policy = "MustBeLogin")]
 
